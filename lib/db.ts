@@ -5,9 +5,7 @@ import { hashPassword, readSession } from "./auth";
 import { dataDir } from "./paths";
 import type { Db, PublicUser, User } from "./types";
 
-function dbPath() {
-  return path.join(dataDir(), "db.json");
-}
+const dbPath = path.join(dataDir(), "db.json");
 
 export const ADMIN_EMAIL = "admin@osman.local";
 export const ADMIN_PASSWORD = "OsmanAdmin2026";
