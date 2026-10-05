@@ -57,13 +57,17 @@ h1 {
   line-height: 1.45;
 }
 .field { margin-bottom: 14px; min-width: 0; max-width: 100%; }
-.date-box { width: 100%; min-width: 0; max-width: 100%; overflow: hidden; border-radius: 12px; }
-input[type="datetime-local"].input {
+.deadline { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+input[type="date"].input,
+input[type="time"].input {
   display: block;
-  width: 100%;
   min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
+  text-align: left;
+}
+input[type="date"].input::-webkit-date-and-time-value,
+input[type="time"].input::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
 }
 .field label, .label {
   display: block;
@@ -481,8 +485,8 @@ textarea.input { height: auto; padding: 12px 14px; resize: vertical; }
   .side .owner { margin: 8px 0 0; text-align: center; }
   .main { padding: 16px 14px calc(20px + env(safe-area-inset-bottom)); }
   .card, .nom, .editor { min-width: 0; max-width: 100%; }
-  .card { padding: 16px; overflow: hidden; }
-  input[type="datetime-local"].input { font-size: 13px; padding: 0 6px 0 8px; }
+  .card { padding: 16px; }
+  .deadline { grid-template-columns: 1fr; }
   .grid.two, .bars, .inline, .pair, .cookies { grid-template-columns: 1fr; display: grid; }
   .cookies { align-items: stretch; left: 12px; right: 12px; }
   .cookies .btn-row { width: 100%; }
