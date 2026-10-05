@@ -10,10 +10,20 @@ export const dynamic = "force-dynamic";
 
 const extensions: Record<string, string> = {
   "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/pjpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
   "image/gif": "gif",
 };
+
+function extensionFor(file: File) {
+  const fromType = extensions[file.type];
+  if (fromType) return fromType;
+  const match = file.name.toLowerCase().match(/\.(jpe?g|png|webp|gif)$/);
+  if (!match) return "";
+  return match[1] === "jpeg" ? "jpg" : match[1];
+}
 
 export async function POST(req: Request) {
   const user = await currentUser();
@@ -21,7 +31,7 @@ export async function POST(req: Request) {
   const file = form?.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "Выберите фото." }, { status: 400 });
 
-  const extension = extensions[file.type];
+  const extension = extensionFor(file);
   if (!extension) return NextResponse.json({ error: "Нужна картинка JPG, PNG, WEBP или GIF." }, { status: 400 });
   if (file.size > MAX_PHOTO_BYTES) return NextResponse.json({ error: "Фото больше 15 МБ." }, { status: 400 });
 
@@ -40,7 +50,7 @@ export async function POST(req: Request) {
   const dir = uploadDir();
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
-  const url = `/uploads/${name}`;
+  const url = `/api/media/${name}`;
 
   if (nominationId && optionId) {
     await updateDb((db) => {

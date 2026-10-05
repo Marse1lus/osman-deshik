@@ -56,7 +56,15 @@ h1 {
   color: var(--muted);
   line-height: 1.45;
 }
-.field { margin-bottom: 14px; }
+.field { margin-bottom: 14px; min-width: 0; max-width: 100%; }
+.date-box { width: 100%; min-width: 0; max-width: 100%; overflow: hidden; border-radius: 12px; }
+input[type="datetime-local"].input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
 .field label, .label {
   display: block;
   margin-bottom: 6px;
@@ -472,7 +480,9 @@ textarea.input { height: auto; padding: 12px 14px; resize: vertical; }
   .avatar { width: 40px; height: 40px; }
   .side .owner { margin: 8px 0 0; text-align: center; }
   .main { padding: 16px 14px calc(20px + env(safe-area-inset-bottom)); }
-  .card { padding: 16px; }
+  .card, .nom, .editor { min-width: 0; max-width: 100%; }
+  .card { padding: 16px; overflow: hidden; }
+  input[type="datetime-local"].input { font-size: 13px; padding: 0 6px 0 8px; }
   .grid.two, .bars, .inline, .pair, .cookies { grid-template-columns: 1fr; display: grid; }
   .cookies { align-items: stretch; left: 12px; right: 12px; }
   .cookies .btn-row { width: 100%; }

@@ -5,5 +5,5 @@ export function dataDir() {
 }
 
 export function uploadDir() {
-  return process.env.UPLOAD_DIR || path.join(process.cwd(), "public", "uploads");
+  return process.env.UPLOAD_DIR || path.join(dataDir(), "uploads");
 }

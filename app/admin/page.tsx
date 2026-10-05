@@ -134,7 +134,9 @@ function AdminEditor() {
             <textarea className="input" rows={3} value={poll.subtitle} onChange={(event) => setPoll({ ...poll, subtitle: event.target.value })} />
           </Field>
           <Field label="Окончание">
-            <input className="input" type="datetime-local" value={deadline} onChange={(event) => setDeadline(event.target.value)} />
+            <div className="date-box">
+              <input className="input" type="datetime-local" value={deadline} onChange={(event) => setDeadline(event.target.value)} />
+            </div>
           </Field>
           <div className="pair">
             <Field label="Лимит аккаунтов с одного IP">

@@ -2,6 +2,7 @@ node_modules
 .next
 data/db.json
 data/secret.key
+data/uploads
 public/uploads/*
 !public/uploads/.gitkeep
 
