@@ -134,26 +134,7 @@ function AdminEditor() {
             <textarea className="input" rows={3} value={poll.subtitle} onChange={(event) => setPoll({ ...poll, subtitle: event.target.value })} />
           </Field>
           <Field label="Окончание">
-            <div className="deadline">
-              <input
-                className="input"
-                type="date"
-                value={deadline.slice(0, 10)}
-                onChange={(event) => {
-                  const time = deadline.slice(11, 16) || "00:00";
-                  setDeadline(event.target.value ? `${event.target.value}T${time}` : "");
-                }}
-              />
-              <input
-                className="input"
-                type="time"
-                value={deadline.slice(11, 16)}
-                onChange={(event) => {
-                  const day = deadline.slice(0, 10);
-                  setDeadline(day ? `${day}T${event.target.value || "00:00"}` : "");
-                }}
-              />
-            </div>
+            <input className="input" type="datetime-local" value={deadline} onChange={(event) => setDeadline(event.target.value)} />
           </Field>
           <div className="pair">
             <Field label="Лимит аккаунтов с одного IP">
