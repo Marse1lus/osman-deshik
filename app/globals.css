@@ -73,12 +73,14 @@ h1 {
   outline: none;
 }
 input[type="datetime-local"].input {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
   min-width: 0;
   max-width: 100%;
   height: 48px;
   padding: 0 14px;
+  line-height: 48px;
   text-align: left;
   -webkit-appearance: none;
   appearance: none;
@@ -86,6 +88,10 @@ input[type="datetime-local"].input {
 input[type="datetime-local"].input::-webkit-date-and-time-value {
   text-align: left;
   margin: 0;
+  height: 48px;
+  line-height: 48px;
+  display: flex;
+  align-items: center;
 }
 .input::placeholder { color: #a0a5b1; }
 .input:focus, .select:focus { border-color: #111; }
