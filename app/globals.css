@@ -135,6 +135,18 @@ textarea.input { height: auto; padding: 12px 14px; resize: vertical; }
 }
 .btn:hover { background: #000; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.is-loading:disabled { opacity: 1; cursor: wait; }
+.btn-loader { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-loader::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .revote-btn { max-width: 460px; font-variant-numeric: tabular-nums; }
 .btn.ghost {
   background: #fff;

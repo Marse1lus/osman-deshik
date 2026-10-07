@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Cabinet, useUser } from "@/components/Cabinet";
 import { Field } from "@/components/ui";
 import { api } from "@/lib/client";
@@ -46,6 +46,12 @@ function AdminEditor() {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [uploadingId, setUploadingId] = useState("");
+  const noticeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!message) return;
+    noticeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [message]);
 
   useEffect(() => {
     if (!user || user.role !== "admin") return;
@@ -124,7 +130,7 @@ function AdminEditor() {
       <h1 className="page-title">Управление</h1>
       <p className="page-lead">Аккаунтов: {users}. Голосов: {voters.length}. Кружок слева от имени — фото участника или продукта. После загрузки оно сразу появляется в голосовании.</p>
       {error ? <div className="alert">{error}</div> : null}
-      {message ? <div className="note">{message}</div> : null}
+      {message ? <div className="note" ref={noticeRef}>{message}</div> : null}
       <div className="editor">
         <section className="card">
           <Field label="Название">
@@ -210,8 +216,8 @@ function AdminEditor() {
           <button className="btn ghost" type="button" style={{ maxWidth: 240 }} onClick={() => setPoll({ ...poll, nominations: [...poll.nominations, blankNomination()] })}>
             Добавить номинацию
           </button>
-          <button className="btn" type="button" style={{ maxWidth: 240 }} disabled={pending} onClick={save}>
-            {pending ? "Сохраняем…" : "Сохранить"}
+          <button className={pending ? "btn is-loading" : "btn"} type="button" style={{ maxWidth: 240 }} disabled={pending} onClick={save}>
+            {pending ? <span className="btn-loader">Сохраняем…</span> : "Сохранить"}
           </button>
         </div>
         <section className="card">

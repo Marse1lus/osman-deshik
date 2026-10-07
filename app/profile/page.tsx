@@ -15,6 +15,11 @@ type PollPayload = {
   myVote: { answers: VoteAnswers; updatedAt: string } | null;
 };
 
+function givenName(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  return parts[1] || parts[0] || "";
+}
+
 function ProfileHome() {
   const user = useUser();
   const params = useSearchParams();
@@ -42,7 +47,7 @@ function ProfileHome() {
 
   return (
     <>
-      <h1 className="page-title">Здравствуйте, {user.profile.fullName.split(" ")[0]}</h1>
+      <h1 className="page-title">Здравствуйте, {givenName(user.profile.fullName)}</h1>
       <p className="page-lead">Личный кабинет · с {formatDate(user.createdAt)}</p>
       {welcome ? <div className="note">Аккаунт создан. Можно голосовать.</div> : null}
       <div className="grid two">
