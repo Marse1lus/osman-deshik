@@ -74,6 +74,16 @@ function AdminEditor() {
     setPoll((current) => current && { ...current, nominations: current.nominations.map((item) => (item.id === id ? { ...item, ...patch } : item)) });
   }
 
+  function moveNomination(index: number, to: number) {
+    setPoll((current) => {
+      if (!current || to < 0 || to >= current.nominations.length) return current;
+      const nominations = [...current.nominations];
+      const [item] = nominations.splice(index, 1);
+      nominations.splice(to, 0, item);
+      return { ...current, nominations };
+    });
+  }
+
   async function uploadPhoto(nominationId: string, optionId: string, file: File | undefined) {
     if (!file || !poll) return;
     setError("");
@@ -153,6 +163,11 @@ function AdminEditor() {
         </section>
         {poll.nominations.map((nomination, index) => (
           <section className="nom" key={nomination.id}>
+            <div className="nom-move">
+              <button className="btn ghost tiny" type="button" disabled={index === 0} onClick={() => moveNomination(index, 0)}>В начало</button>
+              <button className="btn ghost tiny" type="button" disabled={index === 0} onClick={() => moveNomination(index, index - 1)}>Выше</button>
+              <button className="btn ghost tiny" type="button" disabled={index === poll.nominations.length - 1} onClick={() => moveNomination(index, index + 1)}>Ниже</button>
+            </div>
             <Field label={`Номинация ${index + 1}`}>
               <input className="input" value={nomination.title} onChange={(event) => updateNomination(nomination.id, { title: event.target.value })} />
             </Field>
