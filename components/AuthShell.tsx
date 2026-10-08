@@ -20,7 +20,7 @@ export function AuthShell({
     <main className="auth">
       <div className="auth-card">
         <Link href="/login" className="logo">
-          <img src="/logo.png" alt="Virginia group" className="logo-img" />
+          <img src="/logo.png?v=hell" alt="Hell Awards" className="logo-img" />
         </Link>
         <h1>{title}</h1>
         {subtitle ? <p className="lead">{subtitle}</p> : null}

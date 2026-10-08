@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: "Осман Дешик — личный кабинет",
   description: "Личный кабинет и голосование. Сайт принадлежит Virginia group.",
   robots: { index: false, follow: false },
-  icons: { icon: "/logo.png", apple: "/logo.png" },
+  icons: { icon: "/logo.png?v=hell", apple: "/logo.png?v=hell" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -62,7 +62,7 @@ export function Cabinet({ children }: { children: React.ReactNode }) {
       <div className="shell">
         <aside className="side">
           <Link href="/profile" className="side-logo">
-            <img src="/logo.png" alt="Virginia group" className="side-logo-img" />
+            <img src="/logo.png?v=hell" alt="Hell Awards" className="side-logo-img" />
           </Link>
           <nav className="nav">
             {links.map((link) => {
