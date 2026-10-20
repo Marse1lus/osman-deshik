@@ -47,6 +47,94 @@ function blankNomination(): Nomination {
   };
 }
 
+function VoteAudit({
+  poll,
+  voters,
+  query,
+  nominationId,
+  onlyFlagged,
+  openAudit,
+  onQuery,
+  onNomination,
+  onOnlyFlagged,
+  onOpen,
+}: {
+  poll: Poll;
+  voters: AdminPayload["voters"];
+  query: string;
+  nominationId: string;
+  onlyFlagged: boolean;
+  openAudit: string;
+  onQuery: (value: string) => void;
+  onNomination: (value: string) => void;
+  onOnlyFlagged: (value: boolean) => void;
+  onOpen: (value: string) => void;
+}) {
+  const nomination = poll.nominations.find((item) => item.id === nominationId) || poll.nominations[0];
+  const needle = query.trim().toLowerCase();
+  const rows = !nomination ? [] : voters.flatMap((voter) => {
+    const titles = (voter.answers[nomination.id] || [])
+      .map((optionId) => nomination.options.find((option) => option.id === optionId)?.title)
+      .filter((title): title is string => Boolean(title));
+    if (!titles.length) return [];
+    const flagged = voter.sharedIp > 1 || voter.sharedDevice > 1;
+    if (onlyFlagged && !flagged) return [];
+    const choice = titles.join(", ");
+    const haystack = `${voter.name} ${voter.email} ${voter.ip} ${voter.city} ${voter.phone} ${choice}`.toLowerCase();
+    if (needle && !haystack.includes(needle)) return [];
+    return [{ voter, choice, flagged }];
+  });
+
+  return (
+    <section className="card">
+      <h2>Кто за что голосовал</h2>
+      <p className="muted">Красная точка — совпадение IP или устройства. Нажмите строку, чтобы открыть подробности.</p>
+      <div className="audit-tools">
+        <Field label="Номинация">
+          <select className="select" value={nomination?.id || ""} onChange={(event) => onNomination(event.target.value)}>
+            {poll.nominations.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
+          </select>
+        </Field>
+        <Field label="Поиск">
+          <input className="input" value={query} placeholder="Имя, почта или IP" onChange={(event) => onQuery(event.target.value)} />
+        </Field>
+        <label className="audit-check">
+          <input type="checkbox" checked={onlyFlagged} onChange={(event) => onOnlyFlagged(event.target.checked)} />
+          Только совпадения
+        </label>
+      </div>
+      {!nomination || voters.length === 0 ? <p className="muted">Пока никого.</p> : rows.length === 0 ? <p className="muted">Ничего не найдено.</p> : (
+        <div className="audit">
+          <p className="muted">Показано {rows.length}</p>
+          <div className="audit-head"><span>Имя</span><span>Почта</span><span>Выбор</span><span>IP</span><span /></div>
+          {rows.map(({ voter, choice, flagged }) => {
+            const key = `${nomination.id}:${voter.id}`;
+            return (
+              <div key={voter.id}>
+                <button className="audit-row" type="button" onClick={() => onOpen(openAudit === key ? "" : key)}>
+                  <b>{voter.name}</b>
+                  <span>{voter.email}</span>
+                  <span>{choice}</span>
+                  <span>{voter.ip || "—"}</span>
+                  {flagged ? <i className="audit-flag" title="Совпадение" /> : <i />}
+                </button>
+                {openAudit === key ? (
+                  <div className="audit-more">
+                    <span>{voter.city || "Город не указан"} · {voter.phone || "телефон не указан"}</span>
+                    <span>{formatDate(voter.updatedAt)} · устройство {voter.deviceId ? voter.deviceId.slice(0, 8) : "не записано"}</span>
+                    {voter.sharedIp > 1 ? <span className="badge closed">Этот IP у {voter.sharedIp} аккаунтов</span> : null}
+                    {voter.sharedDevice > 1 ? <span className="badge closed">Это устройство у {voter.sharedDevice} аккаунтов</span> : null}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function AdminEditor() {
   const user = useUser();
   const [poll, setPoll] = useState<Poll | null>(null);
@@ -58,6 +146,11 @@ function AdminEditor() {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [uploadingId, setUploadingId] = useState("");
+  const [openAudit, setOpenAudit] = useState("");
+  const [screen, setScreen] = useState<"edit" | "votes">("edit");
+  const [auditQuery, setAuditQuery] = useState("");
+  const [auditNomination, setAuditNomination] = useState("");
+  const [onlyFlagged, setOnlyFlagged] = useState(false);
   const noticeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -153,7 +246,11 @@ function AdminEditor() {
       <p className="page-lead">Аккаунтов: {users}. Голосов: {voters.length}. Кружок слева от имени — фото участника или продукта. После загрузки оно сразу появляется в голосовании.</p>
       {error ? <div className="alert">{error}</div> : null}
       {message ? <div className="note" ref={noticeRef}>{message}</div> : null}
-      <div className="editor">
+      <div className="tabs" role="tablist">
+        <button type="button" role="tab" className={screen === "edit" ? "on" : ""} aria-selected={screen === "edit"} onClick={() => setScreen("edit")}>Настройка</button>
+        <button type="button" role="tab" className={screen === "votes" ? "on" : ""} aria-selected={screen === "votes"} onClick={() => setScreen("votes")}>Голоса · {voters.length}</button>
+      </div>
+      {screen === "edit" ? <div className="editor">
         <section className="card">
           <Field label="Название">
             <input className="input" value={poll.title} onChange={(event) => setPoll({ ...poll, title: event.target.value })} />
@@ -247,35 +344,18 @@ function AdminEditor() {
             {pending ? <span className="btn-loader">Сохраняем…</span> : "Сохранить"}
           </button>
         </div>
-        <section className="card">
-          <h2>Кто за что голосовал</h2>
-          <p className="muted">Совпадение IP или устройства отмечено, чтобы было видно возможные накрутки.</p>
-          {voters.length === 0 ? <p className="muted">Пока никого.</p> : poll.nominations.map((nomination) => (
-            <div className="audit" key={nomination.id}>
-              <h3>{nomination.title}</h3>
-              {nomination.options.map((option) => {
-                const picked = voters.filter((voter) => (voter.answers[nomination.id] || []).includes(option.id));
-                return (
-                  <div className="audit-option" key={option.id}>
-                    <b>{option.title || "Без названия"} · {picked.length}</b>
-                    {picked.length === 0 ? <p className="muted">Нет голосов</p> : picked.map((voter) => (
-                      <div className="audit-person" key={voter.id}>
-                        <div>
-                          <strong>{voter.name}</strong>
-                          <span>{voter.email}{voter.city ? ` · ${voter.city}` : ""}{voter.phone ? ` · ${voter.phone}` : ""}</span>
-                          <span>{voter.ip || "IP не записан"} · {formatDate(voter.updatedAt)}</span>
-                        </div>
-                        {voter.sharedIp > 1 ? <span className="badge closed">IP × {voter.sharedIp}</span> : null}
-                        {voter.sharedDevice > 1 ? <span className="badge closed">устройство × {voter.sharedDevice}</span> : null}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </section>
-      </div>
+      </div> : <VoteAudit
+        poll={poll}
+        voters={voters}
+        query={auditQuery}
+        nominationId={auditNomination}
+        onlyFlagged={onlyFlagged}
+        openAudit={openAudit}
+        onQuery={setAuditQuery}
+        onNomination={setAuditNomination}
+        onOnlyFlagged={setOnlyFlagged}
+        onOpen={setOpenAudit}
+      />}
     </>
   );
 }
