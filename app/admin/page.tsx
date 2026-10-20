@@ -11,7 +11,19 @@ type AdminPayload = {
   poll: Poll;
   limits: Limits;
   users: number;
-  voters: { id: string; name: string; email: string; updatedAt: string }[];
+  voters: {
+    id: string;
+    name: string;
+    email: string;
+    city: string;
+    phone: string;
+    ip: string;
+    deviceId: string;
+    updatedAt: string;
+    answers: Record<string, string[]>;
+    sharedIp: number;
+    sharedDevice: number;
+  }[];
 };
 
 function toLocal(iso: string | null) {
@@ -236,17 +248,32 @@ function AdminEditor() {
           </button>
         </div>
         <section className="card">
-          <h2>Кто проголосовал</h2>
-          {voters.length === 0 ? <p className="muted">Пока никого.</p> : (
-            <dl className="kvs">
-              {voters.map((voter) => (
-                <div key={voter.id}>
-                  <dt>{voter.name}<br />{voter.email}</dt>
-                  <dd>{formatDate(voter.updatedAt)}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          <h2>Кто за что голосовал</h2>
+          <p className="muted">Совпадение IP или устройства отмечено, чтобы было видно возможные накрутки.</p>
+          {voters.length === 0 ? <p className="muted">Пока никого.</p> : poll.nominations.map((nomination) => (
+            <div className="audit" key={nomination.id}>
+              <h3>{nomination.title}</h3>
+              {nomination.options.map((option) => {
+                const picked = voters.filter((voter) => (voter.answers[nomination.id] || []).includes(option.id));
+                return (
+                  <div className="audit-option" key={option.id}>
+                    <b>{option.title || "Без названия"} · {picked.length}</b>
+                    {picked.length === 0 ? <p className="muted">Нет голосов</p> : picked.map((voter) => (
+                      <div className="audit-person" key={voter.id}>
+                        <div>
+                          <strong>{voter.name}</strong>
+                          <span>{voter.email}{voter.city ? ` · ${voter.city}` : ""}{voter.phone ? ` · ${voter.phone}` : ""}</span>
+                          <span>{voter.ip || "IP не записан"} · {formatDate(voter.updatedAt)}</span>
+                        </div>
+                        {voter.sharedIp > 1 ? <span className="badge closed">IP × {voter.sharedIp}</span> : null}
+                        {voter.sharedDevice > 1 ? <span className="badge closed">устройство × {voter.sharedDevice}</span> : null}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </section>
       </div>
     </>

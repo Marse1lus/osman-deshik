@@ -319,6 +319,22 @@ textarea.input { height: auto; padding: 12px 14px; resize: vertical; }
 }
 .badge.wait { background: #f3f4f6; color: #444; }
 .badge.closed { background: #fff1f1; color: var(--danger); }
+.audit { margin-top: 18px; }
+.audit h3 { margin: 0 0 10px; font-size: 18px; }
+.audit-option { margin: 0 0 14px; }
+.audit-option > b { display: block; margin-bottom: 6px; }
+.audit-person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-top: 1px solid #f0f1f4;
+}
+.audit-person div { min-width: 0; }
+.audit-person strong, .audit-person span { display: block; }
+.audit-person span { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.audit-person .badge { flex: none; }
 .kvs { display: grid; gap: 10px; margin: 0; }
 .kvs div { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid #f0f1f4; min-width: 0; }
 .kvs dt { color: var(--muted); min-width: 0; }

@@ -10,11 +10,21 @@ export async function GET() {
   const voters = db.votes
     .map((vote) => {
       const person = db.users.find((item) => item.id === vote.userId);
+      const ip = vote.ip || "";
+      const deviceId = vote.deviceId || "";
+      const answers = vote.answers;
       return {
         id: vote.id,
         name: person?.profile.fullName || "Удалённый аккаунт",
         email: person?.email || "—",
+        city: person?.profile.city || "",
+        phone: person?.profile.phone || "",
+        ip,
+        deviceId,
         updatedAt: vote.updatedAt,
+        answers,
+        sharedIp: ip ? db.votes.filter((item) => item.ip === ip).length : 1,
+        sharedDevice: deviceId ? db.votes.filter((item) => item.deviceId === deviceId).length : 1,
       };
     })
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
