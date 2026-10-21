@@ -17,6 +17,7 @@ export type User = {
   passwordSalt: string;
   role: "user" | "admin";
   createdAt: string;
+  bannedAt?: string;
   profile: Profile;
 };
 

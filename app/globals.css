@@ -322,7 +322,7 @@ textarea.input { height: auto; padding: 12px 14px; resize: vertical; }
 .audit-tools { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; }
 .audit-tools .field { margin-bottom: 0; }
 .audit-check { display: flex; align-items: center; gap: 8px; height: 48px; font-weight: 600; white-space: nowrap; }
-.audit { margin-top: 14px; }
+.audit { margin-top: 14px; container-type: inline-size; }
 .audit h3 { margin: 0 0 8px; font-size: 18px; }
 .audit-head, .audit-row {
   display: grid;
@@ -344,10 +344,45 @@ textarea.input { height: auto; padding: 12px 14px; resize: vertical; }
 }
 .audit-row b, .audit-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .audit-row b { font-size: 14px; }
+.audit-row b.is-banned { color: var(--danger); text-decoration: line-through; }
 .audit-row span { color: var(--muted); font-size: 13px; }
 .audit-flag { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); display: block; }
-.audit-more { display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 0 0 10px; color: var(--muted); font-size: 13px; }
-.audit-more .badge { height: 24px; }
+.audit-more {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100cqi;
+  max-width: 100cqi;
+  box-sizing: border-box;
+  padding: 0 0 12px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 13px;
+}
+.audit-flags { display: flex; flex-wrap: wrap; gap: 6px; }
+.audit-more .badge { height: 24px; white-space: nowrap; }
+.audit-ban {
+  height: 32px;
+  width: auto;
+  margin-top: 2px;
+  padding: 0 12px;
+  border: 1px solid #e4c8c8;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--danger);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.audit-ban:hover { background: #fff7f7; }
+.audit-ban.back { border-color: #d9dde5; color: var(--ink); }
+.audit-ban.back:hover { background: #f6f7f9; }
+.audit-ban:disabled { opacity: 0.45; cursor: not-allowed; }
 .kvs { display: grid; gap: 10px; margin: 0; }
 .kvs div { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid #f0f1f4; min-width: 0; }
 .kvs dt { color: var(--muted); min-width: 0; }

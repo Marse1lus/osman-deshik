@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { clientIp } from "@/lib/auth";
-import { currentUser, pollClosed, readDb, updateDb } from "@/lib/db";
+import { activeVotes, currentUser, pollClosed, readDb, updateDb } from "@/lib/db";
 import { revoteLeft } from "@/lib/text";
 import { safePhoto } from "@/lib/photo";
 import type { Limits, Poll, VoteAnswers } from "@/lib/types";
@@ -39,13 +39,15 @@ export async function GET() {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Нужно войти." }, { status: 401 });
   const db = await readDb();
-  const myVote = db.votes.find((vote) => vote.userId === user.id) || null;
+  if (user.bannedAt) return NextResponse.json({ error: "Аккаунт заблокирован." }, { status: 403 });
+  const votes = activeVotes(db);
+  const myVote = votes.find((vote) => vote.userId === user.id) || null;
   return NextResponse.json({
     poll: db.poll,
     closed: pollClosed(db),
-    ballots: db.votes.length,
+    ballots: votes.length,
     myVote: myVote ? { answers: myVote.answers, updatedAt: myVote.updatedAt } : null,
-    sections: resultsOf(db.poll, db.votes, user.id),
+    sections: resultsOf(db.poll, votes, user.id),
   });
 }
 
@@ -60,6 +62,9 @@ export async function POST(req: Request) {
 
   const saved = await updateDb((db) => {
     if (pollClosed(db)) return { error: "Голосование уже завершено.", status: 403 };
+    if (db.users.find((item) => item.id === user.id)?.bannedAt) {
+      return { error: "Аккаунт заблокирован.", status: 403 };
+    }
     const now = Date.now();
     const existing = db.votes.find((vote) => vote.userId === user.id);
     const recent = (existing?.submissions || []).filter((iso) => now - new Date(iso).getTime() < 30 * 60 * 1000);

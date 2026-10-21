@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const user = await currentUser();
-  if (!user) return NextResponse.json({ user: null }, { status: 401 });
+  if (!user || user.bannedAt) return NextResponse.json({ user: null, error: user?.bannedAt ? "Аккаунт заблокирован." : undefined }, { status: 401 });
   return NextResponse.json({ user: toPublic(user) });
 }
 
@@ -28,6 +28,7 @@ export async function POST(req: Request) {
   if (!user || !(await verifyPassword(password, user.passwordSalt, user.passwordHash))) {
     return NextResponse.json({ error: "Неверный email или пароль." }, { status: 401 });
   }
+  if (user.bannedAt) return NextResponse.json({ error: "Аккаунт заблокирован." }, { status: 403 });
 
   const res = NextResponse.json({ user: toPublic(user) });
   const cookie = sessionCookie(signSession(user.id));

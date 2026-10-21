@@ -111,6 +111,11 @@ export async function currentUser() {
   return db.users.find((user) => user.id === session.uid) || null;
 }
 
+export function activeVotes(db: Db) {
+  const banned = new Set(db.users.filter((user) => user.bannedAt).map((user) => user.id));
+  return db.votes.filter((vote) => !banned.has(vote.userId));
+}
+
 export function pollClosed(db: Db) {
   if (!db.poll.deadline) return false;
   return new Date(db.poll.deadline).getTime() < Date.now();

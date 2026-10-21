@@ -13,6 +13,8 @@ type AdminPayload = {
   users: number;
   voters: {
     id: string;
+    userId: string;
+    banned: boolean;
     name: string;
     email: string;
     city: string;
@@ -58,6 +60,8 @@ function VoteAudit({
   onNomination,
   onOnlyFlagged,
   onOpen,
+  onBan,
+  banningId,
 }: {
   poll: Poll;
   voters: AdminPayload["voters"];
@@ -69,6 +73,8 @@ function VoteAudit({
   onNomination: (value: string) => void;
   onOnlyFlagged: (value: boolean) => void;
   onOpen: (value: string) => void;
+  onBan: (userId: string, banned: boolean) => void;
+  banningId: string;
 }) {
   const nomination = poll.nominations.find((item) => item.id === nominationId) || poll.nominations[0];
   const needle = query.trim().toLowerCase();
@@ -88,7 +94,7 @@ function VoteAudit({
   return (
     <section className="card">
       <h2>Кто за что голосовал</h2>
-      <p className="muted">Красная точка — совпадение IP или устройства. Нажмите строку, чтобы открыть подробности.</p>
+      <p className="muted">Красная точка — совпадение IP или устройства. Нажмите строку, чтобы забанить аккаунт: его голос пропадёт из результатов, пока вы его не вернёте.</p>
       <div className="audit-tools">
         <Field label="Номинация">
           <select className="select" value={nomination?.id || ""} onChange={(event) => onNomination(event.target.value)}>
@@ -112,7 +118,7 @@ function VoteAudit({
             return (
               <div key={voter.id}>
                 <button className="audit-row" type="button" onClick={() => onOpen(openAudit === key ? "" : key)}>
-                  <b>{voter.name}</b>
+                  <span><b className={voter.banned ? "is-banned" : ""}>{voter.name}</b>{voter.banned ? <span className="badge closed">бан</span> : null}</span>
                   <span>{voter.email}</span>
                   <span>{choice}</span>
                   <span>{voter.ip || "—"}</span>
@@ -122,8 +128,15 @@ function VoteAudit({
                   <div className="audit-more">
                     <span>{voter.city || "Город не указан"} · {voter.phone || "телефон не указан"}</span>
                     <span>{formatDate(voter.updatedAt)} · устройство {voter.deviceId ? voter.deviceId.slice(0, 8) : "не записано"}</span>
-                    {voter.sharedIp > 1 ? <span className="badge closed">Этот IP у {voter.sharedIp} аккаунтов</span> : null}
-                    {voter.sharedDevice > 1 ? <span className="badge closed">Это устройство у {voter.sharedDevice} аккаунтов</span> : null}
+                    {voter.sharedIp > 1 || voter.sharedDevice > 1 ? (
+                      <span className="audit-flags">
+                        {voter.sharedIp > 1 ? <span className="badge closed">Этот IP у {voter.sharedIp} аккаунтов</span> : null}
+                        {voter.sharedDevice > 1 ? <span className="badge closed">Это устройство у {voter.sharedDevice} аккаунтов</span> : null}
+                      </span>
+                    ) : null}
+                    <button className={voter.banned ? "audit-ban back" : "audit-ban"} type="button" disabled={!voter.userId || banningId === voter.userId} onClick={() => onBan(voter.userId, !voter.banned)}>
+                      {voter.banned ? "Вернуть голос" : "Забанить"}
+                    </button>
                   </div>
                 ) : null}
               </div>
@@ -151,6 +164,7 @@ function AdminEditor() {
   const [auditQuery, setAuditQuery] = useState("");
   const [auditNomination, setAuditNomination] = useState("");
   const [onlyFlagged, setOnlyFlagged] = useState(false);
+  const [banningId, setBanningId] = useState("");
   const noticeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -219,6 +233,19 @@ function AdminEditor() {
       setError(err instanceof Error ? err.message : "Не удалось загрузить фото.");
     } finally {
       setUploadingId("");
+    }
+  }
+
+  async function banUser(userId: string, banned: boolean) {
+    setBanningId(userId);
+    setError("");
+    try {
+      await api("/api/admin", { method: "POST", body: JSON.stringify({ userId, banned }) });
+      setVoters((list) => list.map((item) => (item.userId === userId ? { ...item, banned } : item)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось изменить блокировку.");
+    } finally {
+      setBanningId("");
     }
   }
 
@@ -355,6 +382,8 @@ function AdminEditor() {
         onNomination={setAuditNomination}
         onOnlyFlagged={setOnlyFlagged}
         onOpen={setOpenAudit}
+        banningId={banningId}
+        onBan={banUser}
       />}
     </>
   );
