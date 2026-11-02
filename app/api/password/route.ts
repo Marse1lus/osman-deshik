@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
-import { hashPassword } from "@/lib/auth";
+import { clientIp, hashPassword, tooMany } from "@/lib/auth";
 import { updateDb } from "@/lib/db";
+import { mailConfigured, sendResetCode } from "@/lib/mail";
 
 export const dynamic = "force-dynamic";
 
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  if (tooMany(`reset:${ip}`, 5, 15 * 60 * 1000)) {
+    return NextResponse.json({ error: "Слишком много запросов. Подождите 15 минут." }, { status: 429 });
+  }
+
   const body = (await req.json().catch(() => null)) as { email?: string } | null;
   const email = body?.email?.trim().toLowerCase() || "";
   if (!emailRe.test(email)) {
@@ -26,11 +32,25 @@ export async function POST(req: Request) {
     return code;
   });
 
-  return NextResponse.json({
-    ok: true,
-    message: "Если аккаунт с таким email есть, код для сброса уже создан.",
-    devCode: process.env.NODE_ENV !== "production" ? devCode || undefined : undefined,
-  });
+  if (!devCode) {
+    return NextResponse.json({ ok: true, message: "Если аккаунт с таким email есть, код уже отправлен на почту." });
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return NextResponse.json({ ok: true, devCode, message: "Код создан для локальной проверки." });
+  }
+
+  if (!mailConfigured()) {
+    return NextResponse.json({ error: "Отправка писем ещё не настроена. Напишите организатору." }, { status: 503 });
+  }
+
+  try {
+    await sendResetCode(email, devCode);
+  } catch {
+    return NextResponse.json({ error: "Не удалось отправить письмо. Попробуйте ещё раз позже." }, { status: 502 });
+  }
+
+  return NextResponse.json({ ok: true, message: "Код отправлен на почту. Проверьте входящие и папку «Спам»." });
 }
 
 export async function PUT(req: Request) {

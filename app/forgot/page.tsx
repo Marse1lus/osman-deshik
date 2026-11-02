@@ -31,7 +31,7 @@ export default function ForgotPage() {
   }
 
   return (
-    <AuthShell title="Восстановление" subtitle="Укажите email, и мы создадим код для нового пароля." footer={<Link className="link" href="/login">Вернуться ко входу</Link>}>
+    <AuthShell title="Восстановление" subtitle="Укажите email — пришлём код для нового пароля." footer={<Link className="link" href="/login">Вернуться ко входу</Link>}>
       <form onSubmit={submit}>
         {error ? <div className="alert">{error}</div> : null}
         <Field label="Email">

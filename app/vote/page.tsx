@@ -88,28 +88,32 @@ function VoteWizard() {
             <RevoteButton updatedAt={data.myVote.updatedAt} now={now} onRevote={() => { setStep(0); setError(""); setRevising(true); }} />
           ) : null}
         </section>
-        <h2 className="page-title" style={{ textAlign: "center", marginTop: 28 }}>Результаты голосования</h2>
-        <p className="page-lead" style={{ textAlign: "center" }}>
-          {data.poll.title}{typeof data.ballots === "number" ? ` ${votesLabel(data.ballots)}.` : ""}
-        </p>
-        {sections.map((section, index) => (
-          <section className="section" key={section.id}>
-            <h3>{index + 1}. {section.title}</h3>
-            <div className="bars">
-              {section.options.map((option) => (
-                <div key={option.id} className={section.myChoices.includes(option.id) ? "bar mine" : "bar"}>
-                  <div className="bar-fill" style={{ width: `${option.percentage}%` }} />
-                  <RoundPhoto src={option.photo} name={option.title} size={52} />
-                  <div className="bar-name">
-                    {option.title}
-                    <small>{votesLabel(option.votes)}{section.myChoices.includes(option.id) ? " · ваш выбор" : ""}</small>
-                  </div>
-                  <b>{option.percentage}%</b>
+        {user?.role === "admin" ? (
+          <>
+            <h2 className="page-title" style={{ textAlign: "center", marginTop: 28 }}>Результаты голосования</h2>
+            <p className="page-lead" style={{ textAlign: "center" }}>
+              {data.poll.title}{typeof data.ballots === "number" ? ` ${votesLabel(data.ballots)}.` : ""}
+            </p>
+            {sections.map((section, index) => (
+              <section className="section" key={section.id}>
+                <h3>{index + 1}. {section.title}</h3>
+                <div className="bars">
+                  {section.options.map((option) => (
+                    <div key={option.id} className={section.myChoices.includes(option.id) ? "bar mine" : "bar"}>
+                      <div className="bar-fill" style={{ width: `${option.percentage}%` }} />
+                      <RoundPhoto src={option.photo} name={option.title} size={52} />
+                      <div className="bar-name">
+                        {option.title}
+                        <small>{votesLabel(option.votes)}{section.myChoices.includes(option.id) ? " · ваш выбор" : ""}</small>
+                      </div>
+                      <b>{option.percentage}%</b>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </section>
-        ))}
+              </section>
+            ))}
+          </>
+        ) : null}
       </div>
     );
   }

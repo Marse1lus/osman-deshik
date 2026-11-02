@@ -39,10 +39,10 @@ export default function ResetPage() {
   }
 
   return (
-    <AuthShell title="Новый пароль" subtitle="Введите код и придумайте новый пароль." footer={<Link className="link" href="/login">Вернуться ко входу</Link>}>
+    <AuthShell title="Новый пароль" subtitle="Введите код из письма и придумайте новый пароль. Если письма нет, проверьте «Спам»." footer={<Link className="link" href="/login">Вернуться ко входу</Link>}>
       <form onSubmit={submit}>
         {error ? <div className="alert">{error}</div> : null}
-        {code ? <div className="note">Код для локальной проверки: {code}. В рабочей версии он уходит на почту.</div> : null}
+        {code ? <div className="note">Код для локальной проверки: {code}.</div> : null}
         <Field label="Email">
           <input className="input" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
         </Field>

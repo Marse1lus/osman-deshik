@@ -42,12 +42,20 @@ export async function GET() {
   if (user.bannedAt) return NextResponse.json({ error: "Аккаунт заблокирован." }, { status: 403 });
   const votes = activeVotes(db);
   const myVote = votes.find((vote) => vote.userId === user.id) || null;
+  const admin = user.role === "admin";
+  const sections = resultsOf(db.poll, votes, user.id);
   return NextResponse.json({
     poll: db.poll,
     closed: pollClosed(db),
-    ballots: votes.length,
+    ballots: admin ? votes.length : null,
     myVote: myVote ? { answers: myVote.answers, updatedAt: myVote.updatedAt } : null,
-    sections: resultsOf(db.poll, votes, user.id),
+    sections: admin
+      ? sections
+      : sections.map((section) => ({
+          ...section,
+          total: 0,
+          options: section.options.map((option) => ({ ...option, votes: 0, percentage: 0 })),
+        })),
   });
 }
 
