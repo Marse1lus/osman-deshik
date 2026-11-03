@@ -54,7 +54,7 @@ export async function GET() {
       : sections.map((section) => ({
           ...section,
           total: 0,
-          options: section.options.map((option) => ({ ...option, votes: 0, percentage: 0 })),
+          options: section.options.map((option) => ({ ...option, votes: 0 })),
         })),
   });
 }

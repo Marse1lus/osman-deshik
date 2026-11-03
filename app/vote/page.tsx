@@ -6,7 +6,7 @@ import { Cabinet, useUser } from "@/components/Cabinet";
 import { RoundPhoto } from "@/components/RoundPhoto";
 import { Modal } from "@/components/ui";
 import { api } from "@/lib/client";
-import { deviceId, formatCountdown, formatDate, revoteLeft, votesLabel } from "@/lib/text";
+import { deviceId, formatCountdown, formatDate, revoteLeft } from "@/lib/text";
 import type { Nomination, Poll, PollOption, VoteAnswers } from "@/lib/types";
 
 type Section = {
@@ -88,32 +88,25 @@ function VoteWizard() {
             <RevoteButton updatedAt={data.myVote.updatedAt} now={now} onRevote={() => { setStep(0); setError(""); setRevising(true); }} />
           ) : null}
         </section>
-        {user?.role === "admin" ? (
-          <>
-            <h2 className="page-title" style={{ textAlign: "center", marginTop: 28 }}>Результаты голосования</h2>
-            <p className="page-lead" style={{ textAlign: "center" }}>
-              {data.poll.title}{typeof data.ballots === "number" ? ` ${votesLabel(data.ballots)}.` : ""}
-            </p>
-            {sections.map((section, index) => (
-              <section className="section" key={section.id}>
-                <h3>{index + 1}. {section.title}</h3>
-                <div className="bars">
-                  {section.options.map((option) => (
-                    <div key={option.id} className={section.myChoices.includes(option.id) ? "bar mine" : "bar"}>
-                      <div className="bar-fill" style={{ width: `${option.percentage}%` }} />
-                      <RoundPhoto src={option.photo} name={option.title} size={52} />
-                      <div className="bar-name">
-                        {option.title}
-                        <small>{votesLabel(option.votes)}{section.myChoices.includes(option.id) ? " · ваш выбор" : ""}</small>
-                      </div>
-                      <b>{option.percentage}%</b>
-                    </div>
-                  ))}
+        <h2 className="page-title" style={{ textAlign: "center", marginTop: 28 }}>Результаты голосования</h2>
+        {sections.map((section, index) => (
+          <section className="section" key={section.id}>
+            <h3>{index + 1}. {section.title}</h3>
+            <div className="bars">
+              {section.options.map((option) => (
+                <div key={option.id} className={section.myChoices.includes(option.id) ? "bar mine" : "bar"}>
+                  <div className="bar-fill" style={{ width: `${option.percentage}%` }} />
+                  <RoundPhoto src={option.photo} name={option.title} size={52} />
+                  <div className="bar-name">
+                    {option.title}
+                    {section.myChoices.includes(option.id) ? <small>ваш выбор</small> : null}
+                  </div>
+                  <b>{option.percentage}%</b>
                 </div>
-              </section>
-            ))}
-          </>
-        ) : null}
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     );
   }
